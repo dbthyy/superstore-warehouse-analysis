@@ -1,0 +1,301 @@
+﻿-- 1. Tổng doanh số bán hàng theo năm đặt hàng là bao nhiêu?
+SELECT 
+	NON EMPTY { [Measures].[Sales] } ON COLUMNS, 
+	NON EMPTY { ([Dim Time].[Order Year].[Order Year].ALLMEMBERS ) } ON ROWS 
+FROM [DW Super Store];
+
+-- 2. Thống kê Số lượng hàng bán được, Chiết khấu, Lợi nhuận và Doanh thu của công ty qua các năm.
+SELECT 
+	NON EMPTY { [Measures].[Sales], [Measures].[Quantity], [Measures].[Profit], [Measures].[Discount Amount] } ON COLUMNS, 
+	NON EMPTY { ([Dim Time].[Order Year].[Order Year].ALLMEMBERS ) } ON ROWS 
+FROM [DW Super Store];
+
+-- 3. Tổng số lượng sản phẩm bán ra từ mỗi danh mục sản phẩm phụ và chính là bao nhiêu?
+SELECT 
+	NON EMPTY { [Measures].[Quantity] } ON COLUMNS, 
+	NON EMPTY { ([Dim Category].[Category].[Category].ALLMEMBERS * [Dim Category].[Sub Category].[Sub Category].ALLMEMBERS ) } ON ROWS 
+FROM [DW Super Store];
+
+-- 4. Thống kê lợi nhuận thu được từ các sản phẩm của danh mục Furniture theo từng danh mục con
+ SELECT 
+	NON EMPTY { [Measures].[Profit] } ON COLUMNS, 
+	NON EMPTY { ([Dim Product - Category].[Category].[Category].ALLMEMBERS * [Dim Product - Category].[Sub Category].[Sub Category].ALLMEMBERS ) } ON ROWS 
+FROM ( 
+	SELECT ( { [Dim Category].[Category].&[Furniture] } ) ON COLUMNS 
+	FROM [DW Super Store]
+	) 
+WHERE ( [Dim Category].[Category].&[Furniture] );
+
+-- 5. Thống kê mức độ tăng trưởng của doanh số bán hàng tại Bang đông dân nhất trong mỗi khu vực trong năm 2014.
+SELECT 
+    NON EMPTY { [Measures].[Sales] } ON COLUMNS, 
+    NON EMPTY 
+    { ( 
+            [Dim Time].[Order Year].[Order Year].ALLMEMBERS 
+            * [Dim Time].[Hierarchy].[Order Month].ALLMEMBERS 
+            * [Dim Location].[State].[State].ALLMEMBERS 
+        ) } ON ROWS  
+
+FROM 
+(
+    SELECT 
+        ( { [Dim Time].[Order Year].&[2014] } ) ON COLUMNS 
+    FROM 
+    (
+        SELECT 
+            ( { 
+                    [Dim Location].[State].&[Florida]&[United States]&[South],  
+                    [Dim Location].[State].&[California]&[United States]&[West],  
+                    [Dim Location].[State].&[New York]&[United States]&[East],  
+                    [Dim Location].[State].&[Texas]&[United States]&[Central] 
+                } ) ON COLUMNS 
+        FROM [DW Super Store]
+    ));
+
+-- 6. Top 5 thành phố có doanh thu cao nhất.
+SELECT 
+	NON EMPTY { [Measures].[Sales] } ON COLUMNS, 
+	NON EMPTY { ([Dim Location].[City].[City].ALLMEMBERS ) } ON ROWS 
+FROM ( 
+	SELECT ( [Top 5 City Sales] ) ON COLUMNS 
+	FROM [DW Super Store]);
+
+--7. Thống kê số lượng sản phẩm theo danh mục sản phẩm chính của top 5 thành phố có doanh thu cao nhất
+SELECT 
+	NON EMPTY { [Measures].[Quantity] } ON COLUMNS, 
+	NON EMPTY { ([Dim Location].[City].[City].ALLMEMBERS * 
+		[Dim Category].[Category].[Category].ALLMEMBERS ) } ON ROWS 
+FROM ( 
+	SELECT ( [Top 5 City Sales] ) ON COLUMNS 
+	FROM [DW Super Store]
+);
+
+--8. Doanh thu trung bình của từng sản phẩm
+SELECT 
+	NON EMPTY { [Measures].[Avg Profit] } ON COLUMNS, 
+	NON EMPTY { ([Dim Product].[Product Name].[Product Name].ALLMEMBERS ) } ON ROWS 
+FROM [DW Super Store];
+
+--9. Thống kê sản phẩm lợi nhuận âm theo thứ tự giảm dần.
+SELECT
+    { [Measures].[Avg Profit] } ON COLUMNS,
+
+    ORDER(
+        FILTER(
+            [Dim Product].[Product Name].[Product Name].Members,
+            [Measures].[Avg Profit] < 0
+        ),
+        [Measures].[Avg Profit],
+        ASC
+    ) ON ROWS
+
+FROM [DW Super Store];
+
+-- 10. Thống kê lợi nhuận qua các năm của 10 sản phẩm lỗ nhất
+SELECT 
+	NON EMPTY { [Measures].[Profit] } ON COLUMNS, 
+	NON EMPTY { (
+		[Dim Product].[Product Name].[Product Name].ALLMEMBERS * 
+			[Dim Time].[Order Year].[Order Year].ALLMEMBERS	
+	) } ON ROWS 
+FROM ( 
+	SELECT ( [Top 10 Negative Product Profit] ) ON COLUMNS 
+	FROM [DW Super Store]
+);
+
+-- 11. Thời gian giao hàng trung bình (DaysToShip) của các đơn hàng có sự khác biệt như thế nào 
+-- giữa các Phân khúc Khách hàng và theo từng Năm đặt hàng?
+SELECT 
+	NON EMPTY { [Measures].[Avg DaysToShip] } ON COLUMNS, 
+	NON EMPTY { ([Dim Time].[Order Year].[Order Year].ALLMEMBERS * 
+		[Dim Segment].[Segment].[Segment].ALLMEMBERS ) } ON ROWS 
+FROM [DW Super Store];
+
+-- 12. Với mỗi thành phố nằm trong top 5 lợi nhuận, hãy tìm ra top 3 sản phẩm bán tốt nhất.
+SELECT 
+	NON EMPTY { [Measures].[Sales] } ON COLUMNS, 
+	NON EMPTY { ([Dim Location].[Hierarchy].[City].ALLMEMBERS * 
+	[Dim Product].[Product Name].ALLMEMBERS ) } ON ROWS 
+FROM ( 
+	SELECT ( [Top 3 Product Sales] ) ON COLUMNS 
+	FROM ( 
+		SELECT ( [Top 5 City Sales] ) ON COLUMNS 
+		FROM [DW Super Store]));
+
+-- 13. (Câu trên lớp) Liệt kê top 1 loại danh mục có số lượng bán ra cao nhất theo từng tháng trong năm 2014 
+-- và cho biết số lượng tương ứng
+ SELECT 
+	NON EMPTY { [Measures].[Quantity] } ON COLUMNS, 
+	NON EMPTY { ([Dim Time].[Order Month].[Order Month].ALLMEMBERS * 
+		[Dim Category].[Category].[Category].ALLMEMBERS ) } ON ROWS 
+FROM ( 
+	SELECT ( [Top 1 Category Quantity] ) ON COLUMNS 
+	FROM ( 
+		SELECT ( { [Dim Time].[Order Year].&[2014] } ) ON COLUMNS 
+		FROM [DW Super Store])) WHERE ( [Dim Time].[Order Year].&[2014] );
+
+SELECT 
+    { [Measures].[Quantity] } ON COLUMNS,
+    NON EMPTY
+    GENERATE(
+        [Dim Time].[Order Month].MEMBERS,
+        {
+            (
+                [Dim Time].[Order Month].CURRENTMEMBER,
+                TOPCOUNT(
+                    EXISTING [Category].[Category].MEMBERS,
+                    2,
+                    [Measures].[Quantity]
+                )
+            )
+        }
+    ) ON ROWS
+FROM 
+(
+    SELECT 
+        { [Dim Time].[Order Year].&[2014] } ON COLUMNS
+    FROM [DW Super Store]
+);
+
+-- 14. (Câu trên lớp) Liệt kê top 5 thành phố có doanh thu cao nhất trong cả 2 năm 2013 và 2014
+ SELECT 
+	NON EMPTY { [Measures].[Sales] } ON COLUMNS, 
+	NON EMPTY { ([Dim Time].[Order Year].[Order Year].ALLMEMBERS *
+		[Dim Location].[City].[City].ALLMEMBERS ) } ON ROWS 
+FROM ( 
+	SELECT ( { [Dim Time].[Order Year].&[2013], [Dim Time].[Order Year].&[2014] } ) ON COLUMNS 
+	FROM ( 
+		SELECT ( [Top 5 City Sales] ) ON COLUMNS 
+		FROM [DW Super Store]));
+
+SELECT 
+    [Measures].[Sales] ON COLUMNS,
+    GENERATE(
+        [Dim Time].[Hierarchy].[Order Year].[2014].children,
+        (
+            TOPCOUNT(
+                [Dim Customer].[Customer ID].members,
+                1,
+                ([Measures].[Sales], [Dim Time].[Hierarchy].CurrentMember)
+            )
+        )
+    ) ON ROWS
+FROM [DW Super Store];
+
+SELECT 
+    {[Measures].[Sales], [Measures].[Quantity]} ON COLUMNS,
+    TOPCOUNT(
+        FILTER(
+            [Dim Customer].[Customer ID].members,
+            [Measures].[Quantity] >= 50
+        ),
+        5,
+        [Measures].[Sales]
+    ) ON ROWS
+FROM [DW Super Store];
+
+SELECT 
+    {[Measures].[Sales], [Measures].[Quantity]} ON COLUMNS,
+    TOPCOUNT(
+        FILTER(
+            [Dim Customer].[Customer ID].children,
+            [Measures].[Quantity] >= 50
+        ),
+        5,
+        [Measures].[Sales]
+    ) ON ROWS
+FROM [DW Super Store];
+
+SELECT
+	[Measures].[Sales] ON COLUMNS,
+	TOPCOUNT(
+	[Dim Category].[Category].children,
+	3,
+	[Measures].[Sales]
+	) ON ROWS
+FROM [DW Super Store]
+WHERE
+    {[Dim Time].[Order Year].&[2014], [Dim Time].[Order Year].&[2015]};
+
+SELECT
+	[Measures].[Sales] ON COLUMNS,
+	GENERATE (
+		[Dim Time].[Hierarchy].[Order Year].members,
+		TOPCOUNT(
+		[Dim Category].[Category].children * [Dim Time].[Hierarchy].currentmember,
+		3,
+		[Measures].[Sales]
+		)
+		) ON ROWS
+FROM [DW Super Store]
+WHERE
+    {[Dim Time].[Order Year].&[2014], [Dim Time].[Order Year].&[2011]};
+
+SELECT 
+	[Measures].[Quantity] ON COLUMNS,
+	DRILLDOWNLEVEL([Dim Time].[Hierarchy].[Order Year]) ON ROWS
+FROM [DW Super Store];
+
+//Với mỗi quý trong năm 2023, cho biết 02 loại hình du lịch có số tour du lịch nhiều nhất.
+
+SELECT
+	[Measures].[Quantity] ON COLUMNS,
+	GENERATE (
+		([Dim Time].[Hierarchy].[Order Year].&[2014].CHILDREN),
+		TOPCOUNT(
+			[Dim Category].[Category].children * [Dim Time].[Hierarchy].currentmember,
+			2,
+			[Measures].[Quantity])) ON ROWS
+FROM [DW Super Store];
+
+// Liệt kê top 03 category nhiều quantity nhất trong cả hai năm 2011 và 2013. 
+SELECT 
+	[Measures].[Quantity] ON COLUMNS,
+	TOPCOUNT(
+		[Dim Category].[Category].children,
+		3,
+		[Measures].[Quantity]
+		) 
+		ON ROWS
+FROM [DW Super Store]
+WHERE ({[Dim Time].[Order Year].&[2011], [Dim Time].[Order Year].&[2013]});
+
+SELECT 
+	[Measures].[Quantity] ON COLUMNS,
+	INTERSECT(
+		TOPCOUNT(
+			[Dim Category].[Category].children,
+			1,
+			([Measures].[Quantity], [Dim Time].[Order Year].&[2011])
+		),
+		TOPCOUNT(
+			[Dim Category].[Category].children,
+			1,
+			([Measures].[Quantity], [Dim Time].[Order Year].&[2012])
+		)
+	) *
+	{[Dim Time].[Order Year].&[2011], [Dim Time].[Order Year].&[2012]} ON ROWS
+FROM [DW Super Store];
+
+
+SELECT 
+	[Measures].[Quantity] ON COLUMNS,
+	[Dim Category].[Category].members ON ROWS
+FROM [DW Super Store]
+WHERE ([Dim Time].[Order Month].&[1]&[2014]);
+
+//liệt kê 5 KH co tổng số tiền lớn nhất và có số quantity >=3
+SELECT 
+	{[Measures].[Quantity], [Measures].[Sales]} ON COLUMNS,
+	TOPCOUNT(
+		FILTER(
+				[Dim Customer].[Customer ID].children,
+				[Measures].[Quantity] >=50
+				),
+		5,
+		[Measures].[Sales]
+		) ON ROWS
+FROM [DW Super Store]
+
+
+
