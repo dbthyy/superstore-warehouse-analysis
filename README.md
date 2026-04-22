@@ -51,6 +51,8 @@ Hệ thống báo cáo được xây dựng trên Power BI kết nối trực ti
 - Programming: Python (cho tiền xử lý dữ liệu).
 
 ## Tác giả
-MSSV,Họ và tên,Nội dung đóng góp
-23521021,Hồ Như Hồng Ngọc,"Thiết kế kiến trúc Kho dữ liệu (Snowflake Schema), cấu hình các chiều (Dimensions) và bảng sự kiện (Fact table). Kết hợp Học Máy (Machine Learning) và Khai phá dữ liệu (Data Mining) nhằm tìm ra insights dữ liệu."
-23521563,Đinh Bảo Thy,"Triển khai các gói ETL bằng SSIS để làm sạch và chuyển đổi dữ liệu. Xây dựng các khối phân tích đa chiều (Cube) trong SSAS, thiết lập Measures và Hierarchies. Thiết kế Dashboard báo cáo trên Power BI và thực hiện các truy vấn phân tích trên SQL."
+
+| MSSV | Họ và tên | Nội dung đóng góp |
+|------|----------|-------------------|
+| 23521021 | Hồ Như Hồng Ngọc | Thiết kế kiến trúc Kho dữ liệu (Snowflake Schema), cấu hình các chiều (Dimensions) và bảng sự kiện (Fact table). Kết hợp Machine Learning và Data Mining để tìm insights. |
+| 23521563 | Đinh Bảo Thy | Triển khai ETL bằng SSIS, xây dựng Cube trong SSAS, thiết lập Measures & Hierarchies. Thiết kế Dashboard Power BI và truy vấn phân tích SQL. |
