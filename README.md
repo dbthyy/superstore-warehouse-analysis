@@ -2,7 +2,9 @@
 Môn học IS217 - Kho dữ liệu và OLAP
 
 ## Tổng quan
-Dự án này tập trung vào việc xây dựng hệ thống hỗ trợ ra quyết định (DSS) cho chuỗi cung ứng bán lẻ dựa trên bộ dữ liệu Superstore Sales. Hệ thống thực hiện chuyển đổi dữ liệu thô thành kho dữ liệu chuẩn hóa, xây dựng các khối phân tích đa chiều để phục vụ báo cáo quản trị chuyên sâu.
+Dự án này xây dựng hệ thống hỗ trợ ra quyết định (DSS) cho chuỗi cung ứng bán lẻ dựa trên bộ dữ liệu Superstore Sales. Hệ thống thực hiện chuyển đổi dữ liệu thô thành kho dữ liệu chuẩn hóa, xây dựng các khối phân tích đa chiều để phục vụ báo cáo quản trị chuyên sâu.
+
+<img width="828" height="427" alt="image" src="https://github.com/user-attachments/assets/690174fb-ef52-480c-a983-25d806554cba" />
 
 ## Kiến trúc Hệ thống
 Dự án được triển khai qua 4 giai đoạn kỹ thuật chính:
@@ -13,6 +15,7 @@ Dự án được triển khai qua 4 giai đoạn kỹ thuật chính:
 
 ## Thiết kế Kho dữ liệu (Data Warehouse)
 Hệ thống sử dụng mô hình Lược đồ Bông tuyết (Snowflake Schema) để tối ưu hóa việc lưu trữ và phân tích.
+<img width="828" height="348" alt="image" src="https://github.com/user-attachments/assets/1c2f0714-a721-47cc-948e-5a0cedd7ebf4" />
 
 Các thành phần chính:
 - Bảng Sự kiện (Fact Table): FACT chứa các chỉ số đo lường như Sales, Quantity, Discount, Profit, DaysToShip, và HolidayScore.
@@ -27,21 +30,44 @@ Các thành phần chính:
 
 ## Tích hợp dữ liệu (SSIS)
 Quy trình ETL được thực hiện bằng SQL Server Integration Services (SSIS) để chuyển đổi dữ liệu từ file phẳng (.csv) vào SQL Server.
-- Data Flow Task: Sử dụng các component Sort để loại bỏ trùng lặp và Data Conversion để chuẩn hóa kiểu dữ liệu.
-- Derived Columns: Tạo các cột phái sinh cho DimTime (phân tách Ngày, Tháng, Năm).
-- Merge Join: Kết hợp các bảng Bridge để hoàn thiện cấu trúc Dimension và Fact.
+
+<img width="828" height="400" alt="image" src="https://github.com/user-attachments/assets/f3fa95ca-46b0-4c50-8f50-d89eeec99335" />
 
 ## Phân tích đa chiều (SSAS)
 Sử dụng SQL Server Analysis Services (SSAS) để xây dựng Cube, cho phép truy vấn dữ liệu nhanh chóng bằng ngôn ngữ MDX.
 - Measures: Tính toán các độ đo quan trọng như Sales, Profit, Quantity và các thành viên tính toán (Calculated Members) như Discount Amount, Avg Profit.
 - Hierarchies: Thiết lập phân cấp cho OrderDate (Year > Month > Day) và Location (Region > State > City > PostalCode) để hỗ trợ tính năng Drill-down.
 - Querying: Triển khai 14 câu truy vấn nghiệp vụ phức tạp về doanh thu theo năm, top thành phố, lợi nhuận âm và hiệu quả vận chuyển.
+- 
+<img width="828" height="460" alt="image" src="https://github.com/user-attachments/assets/2246cc17-f817-43d3-92a9-e0e9e72ac090" />
 
-## Báo cáo & Trực quan hóa (Power BI)
-Hệ thống báo cáo được xây dựng trên Power BI kết nối trực tiếp với SQL Server/SSAS Cube để cung cấp cái nhìn trực quan về hiệu suất kinh doanh.
-- Báo biểu 1 (Thời gian): Phân tích xu hướng doanh thu ổn định qua các năm, đặc biệt tăng mạnh vào quý 4.
-- Báo biểu 2 (Sản phẩm): Làm rõ sự đối lập giữa Office Supplies (số lượng bán cao nhất) và Technology (lợi nhuận cao nhất).
-- Báo biểu 3 (Địa lý): Xác định New York City và California là hai thị trường trọng điểm mang lại lợi nhuận lớn nhất.
+Ví dụ 1 câu truy vấn sử dụng MDX:
+
+<img width="828" height="624" alt="image" src="https://github.com/user-attachments/assets/97df9d41-0d6a-4d41-9d3d-31c5d5fb10d4" />
+
+
+## Báo cáo & Trực quan hóa 
+### Công cụ Power BI: 
+
+- Báo biểu 1: Phân tích Doanh số theo Thời gian
+<img width="828" height="460" alt="image" src="https://github.com/user-attachments/assets/66cf8fd5-6cce-4a01-af99-b80db5822924" />
+
+- Báo biểu 2: Phân Tích Theo Danh Mục Sản Phẩm
+
+<img width="828" height="460" alt="image" src="https://github.com/user-attachments/assets/d90f755f-013b-4a0b-9a67-55f205932a10" />
+
+- Báo biểu 3: Phân tích Doanh thu theo Khu vực Địa lý
+
+<img width="828" height="460" alt="image" src="https://github.com/user-attachments/assets/e2c83681-c142-492b-86ef-75f7eb96a9c1" />
+
+### Công cụ Excel:
+- Báo biểu 4: Phân tích theo Danh mục và Sản phẩm Lợi nhuận Âm
+<img width="828" height="460" alt="image" src="https://github.com/user-attachments/assets/4dc78942-9b32-48c4-8898-d68b279c98d4" />
+
+- Báo biểu 5: Thời gian giao hàng trung bình (DaysToShip) của các đơn hàng có sự khác biệt như thế nào giữa các Phân khúc Khách hàng và theo từng Năm đặt hàng?
+
+<img width="828" height="460" alt="image" src="https://github.com/user-attachments/assets/8586bf6f-f024-4cdd-b70f-6da048e08a29" />
+
 
 ## Công cụ sử dụng
 - Database: Microsoft SQL Server.
@@ -55,4 +81,4 @@ Hệ thống báo cáo được xây dựng trên Power BI kết nối trực ti
 | MSSV | Họ và tên | Nội dung đóng góp |
 |------|----------|-------------------|
 | 23521021 | Hồ Như Hồng Ngọc | Thiết kế kiến trúc Kho dữ liệu (Snowflake Schema), cấu hình các chiều (Dimensions) và bảng sự kiện (Fact table). Kết hợp Machine Learning và Data Mining để tìm insights. |
-| 23521563 | Đinh Bảo Thy | Triển khai ETL bằng SSIS, xây dựng Cube trong SSAS, thiết lập Measures & Hierarchies. Thiết kế Dashboard Power BI và truy vấn phân tích SQL. |
+| 23521563 | Đinh Bảo Thy | Triển khai ETL bằng SSIS, xây dựng Cube trong SSAS, thiết lập Measures & Hierarchies. Thiết kế Dashboard Power BI, Excel và truy vấnMDX. |
